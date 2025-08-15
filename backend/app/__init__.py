@@ -2,10 +2,11 @@ from flask import Flask
 from flask_cors import CORS
 
 from .config import Config
-from .routes.health import health_blueprint
 
 
 APP_VERSION = "0.1.0"
+
+from .routes.health import health_blueprint
 
 
 def create_app(config_overrides: dict | None = None) -> Flask:
