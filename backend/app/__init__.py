@@ -1,8 +1,11 @@
 from flask import Flask
 from flask_cors import CORS
 
+from .auth import init_jwt
 from .config import Config
 from .constants import APP_VERSION
+from .database import init_db
+from .routes.auth import auth_blueprint
 from .routes.health import health_blueprint
 
 
@@ -15,9 +18,14 @@ def create_app(config_overrides: dict | None = None) -> Flask:
     app = Flask(__name__)
     app.config.from_object(config)
 
+    # 初始化扩展
     CORS(app, resources={r"/*": {"origins": "*"}})
+    init_db(app)
+    init_jwt(app)
 
+    # 注册蓝图
     app.register_blueprint(health_blueprint)
+    app.register_blueprint(auth_blueprint)
 
     # Health/version endpoint at root path for convenience
     @app.get("/")

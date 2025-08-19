@@ -28,13 +28,31 @@ pytest -q
 
 ## 项目状态
 
-🎉 **Phase 1 已完成** - 核心域与 API 草案
+🎉 **Phase 1 已完成** - 核心域与 API 草案  
+🚧 **Phase 2 进行中** - MVP 基础功能 (~40% 完成)
+
+### ✅ 已完成功能
 - ✅ 完整的业务域模型设计（User、Room、Participant、Message、AgentProfile、ConversationRun）
 - ✅ OpenAPI 3.0 规范草案（`docs/api-spec.yaml`）
 - ✅ 数据库迁移方案（Alembic + PostgreSQL）
 - ✅ 代码质量工具链（ruff、black、mypy）
+- ✅ **用户认证系统** (JWT注册/登录/权限管理)
+- ✅ **PostgreSQL数据持久化** (所有核心表已创建)
+- ✅ **千问API配置** (支持多LLM提供商)
 
-**接下来**：开始 Phase 2 MVP 开发（用户认证、房间管理、基础消息功能）
+### 🚧 开发中功能
+- 🔄 房间管理功能 (创建/加入/配置房间)
+- 🔄 消息系统 (用户→AI对话)
+- 🔄 AI流式响应 (SSE/WebSocket)
+- 🔄 前端聊天UI
+
+**当前API端点**：
+- `GET /health` - 健康检查
+- `POST /auth/register` - 用户注册  
+- `POST /auth/login` - 用户登录
+- `POST /auth/refresh` - 刷新令牌
+- `GET /auth/me` - 获取用户信息
+- `PATCH /auth/me` - 更新用户信息
 
 ## 目录结构
 
