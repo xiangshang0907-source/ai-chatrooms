@@ -2,10 +2,7 @@ from flask import Flask
 from flask_cors import CORS
 
 from .config import Config
-
-
-APP_VERSION = "0.1.0"
-
+from .constants import APP_VERSION
 from .routes.health import health_blueprint
 
 

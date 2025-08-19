@@ -8,12 +8,12 @@
 - [x] 健康检查 API（/health）
 - [x] 本地开发脚手架（venv + requirements）
 - [x] 单元测试基础（pytest）
-- [ ] 代码规范与静态检查（ruff/flake8）
+- [x] 代码规范与静态检查（ruff/black/mypy + pyproject.toml + Makefile）
 
 ## Phase 1｜核心域与 API 草案
-- [ ] 业务域建模（User、Room、Participant、Message、AgentProfile、Provider 等）
-- [ ] OpenAPI 草案
-- [ ] DB 迁移方案（Alembic）
+- [x] 业务域建模（User、Room、Participant、Message、AgentProfile、Provider 等）
+- [x] OpenAPI 草案（docs/api-spec.yaml）
+- [x] DB 迁移方案（Alembic + 初始迁移脚本）
 
 ## Phase 2｜MVP（单房间、单 AI、用户互动）
 - [ ] 注册/登录（JWT）

@@ -1,6 +1,6 @@
 from flask import Blueprint
 
-from .. import APP_VERSION
+from ..constants import APP_VERSION
 
 health_blueprint = Blueprint("health", __name__)
 
