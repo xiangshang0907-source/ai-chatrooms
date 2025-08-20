@@ -7,7 +7,9 @@ export default defineConfig({
     host: true,
     port: 5173,
     proxy: {
-      '/health': 'http://localhost:8000'
+      '/health': 'http://localhost:8000',
+      '/auth': 'http://localhost:8000',
+      '/rooms': 'http://localhost:8000'
     }
   }
 })

@@ -17,7 +17,7 @@ class Config:
     DEFAULT_LLM_PROVIDER: str = os.getenv("DEFAULT_LLM_PROVIDER", "qwen")
 
     # 千问（百炼）配置
-    QWEN_API_KEY: str = os.getenv("QWEN_API_KEY", "sk-c8c8799f8fdd4fa7a1ba0d4a7360060a")
+    QWEN_API_KEY: str | None = os.getenv("QWEN_API_KEY")
     QWEN_API_BASE: str = os.getenv("QWEN_API_BASE", "https://dashscope.aliyuncs.com/api/v1")
 
     # OpenAI 配置
