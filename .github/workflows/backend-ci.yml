@@ -12,6 +12,22 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -22,7 +38,36 @@ jobs:
           cd backend
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      - name: Run tests
+      - name: Run basic tests (no PostgreSQL required)
         run: |
           cd backend
-          pytest -q
+          # 只运行不依赖PostgreSQL的测试
+          pytest tests/test_health.py tests/test_auth_simple.py -v
+          
+      - name: Set up database for full tests
+        run: |
+          cd backend
+          # 等待 PostgreSQL 就绪
+          until pg_isready -h localhost -p 5432 -U postgres; do
+            echo "等待 PostgreSQL 启动..."
+            sleep 2
+          done
+          # 创建测试数据库
+          PGPASSWORD=postgres createdb -h localhost -U postgres ai_chatrooms_test
+        env:
+          PGPASSWORD: postgres
+          
+      - name: Run database migrations
+        run: |
+          cd backend
+          python -m alembic upgrade head
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ai_chatrooms_test
+          
+      - name: Run PostgreSQL tests
+        run: |
+          cd backend
+          # 运行需要PostgreSQL的测试
+          pytest tests/test_auth_full.py -v
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ai_chatrooms_test
