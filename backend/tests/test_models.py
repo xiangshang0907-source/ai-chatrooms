@@ -10,12 +10,12 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from app.models.user import UserRole, UserStatus
 
 
-class TestBase(DeclarativeBase):
+class MockBase(DeclarativeBase):
     """独立的测试基类."""
     pass
 
 
-class SimpleUser(TestBase):
+class SimpleUser(MockBase):
     """简化的测试用户模型（无关系）."""
 
     __tablename__ = "test_users"
