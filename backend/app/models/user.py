@@ -56,9 +56,6 @@ class User(BaseModel):
     participations: Mapped[list["Participant"]] = relationship(
         "Participant", back_populates="user", cascade="all, delete-orphan"
     )
-    messages: Mapped[list["Message"]] = relationship(
-        "Message", back_populates="author", cascade="all, delete-orphan"
-    )
 
     def __repr__(self) -> str:
         """字符串表示."""

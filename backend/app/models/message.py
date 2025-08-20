@@ -32,6 +32,7 @@ class MessageStatus(str, Enum):
     """消息状态枚举."""
 
     SENT = "sent"
+    GENERATING = "generating"  # AI生成中状态
     DELIVERED = "delivered"
     READ = "read"
     EDITED = "edited"
@@ -68,7 +69,6 @@ class Message(BaseModel):
     participant: Mapped["Participant"] = relationship(
         "Participant", back_populates="messages"
     )
-    author: Mapped["User"] = relationship("User", back_populates="messages")
     run: Mapped[Optional["ConversationRun"]] = relationship(
         "ConversationRun", back_populates="messages"
     )

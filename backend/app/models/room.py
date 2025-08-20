@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from .user import User
 from uuid import UUID
 
-from sqlalchemy import ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, ForeignKey, Integer, JSON, String, Text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -44,7 +44,7 @@ class Room(BaseModel):
     round_timeout_seconds: Mapped[int] = mapped_column(Integer, default=300)
 
     # 扩展配置（JSON）
-    settings: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    settings: Mapped[dict[str, Any] | None] = mapped_column(JSON)
 
     # 外键
     owner_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), nullable=False)
