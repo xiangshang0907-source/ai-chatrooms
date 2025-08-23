@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Send, ArrowLeft, Users, Bot, User as UserIcon, Loader } from 'lucide-react';
-import { authService } from '../auth';
-import { Message, Room, User, StreamMessage } from '../types';
+import { authService } from '@/auth';
+import { Message, Room, User, StreamMessage } from '@/types';
 
 interface ChatRoomProps {
   roomId: string;
@@ -95,12 +95,7 @@ export function ChatRoom({ roomId, onBack }: ChatRoomProps) {
 
       // 创建新的EventSource连接用于流式响应
       const token = authService.getToken();
-      const eventSource = new EventSource(`/rooms/${roomId}/messages/stream`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const eventSource = new EventSource(`/rooms/${roomId}/messages/stream?token=${encodeURIComponent(token || '')}`);
 
       eventSourceRef.current = eventSource;
 

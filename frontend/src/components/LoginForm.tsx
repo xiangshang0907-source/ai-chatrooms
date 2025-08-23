@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { LogIn, User, Lock, AlertCircle } from 'lucide-react';
-import { authService } from '../auth';
+import { authService } from '@/auth';
 
 interface LoginFormProps {
   onLogin: () => void;

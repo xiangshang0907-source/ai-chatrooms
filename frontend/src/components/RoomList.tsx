@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, Users, Clock, Settings, LogOut } from 'lucide-react';
-import { authService } from '../auth';
-import { Room, User } from '../types';
+import { authService } from '@/auth';
+import { Room, User } from '@/types';
 
 interface RoomListProps {
   onJoinRoom: (roomId: string) => void;

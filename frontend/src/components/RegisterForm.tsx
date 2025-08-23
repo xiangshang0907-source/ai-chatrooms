@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { UserPlus, User, Mail, Lock, Type, AlertCircle } from 'lucide-react';
-import { authService } from '../auth';
+import { authService } from '@/auth';
 
 interface RegisterFormProps {
   onRegister: () => void;
