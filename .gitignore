@@ -62,6 +62,11 @@ yarn-error.log*
 frontend/dist/
 frontend/.vite/
 
+# Next.js
+frontend/.next/
+frontend/out/
+frontend/build/
+
 # Environment variables
 .env.local
 .env.development.local
@@ -76,6 +81,15 @@ frontend/.vite/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+
+# Claude/Cursor specific
+.claude/
+.cursor/
 
 # Docker
 .dockerignore
@@ -93,3 +107,5 @@ logs/
 # Database
 *.db
 *.sqlite
+
+.serena/

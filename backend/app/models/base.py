@@ -46,8 +46,14 @@ class BaseEntity:
 
     def to_dict(self) -> dict[str, Any]:
         """转换为字典."""
-        return {
-            key: value
-            for key, value in self.__dict__.items()
-            if not key.startswith("_")
-        }
+        result = {}
+        for key, value in self.__dict__.items():
+            if not key.startswith("_"):
+                # 处理特殊类型转换
+                if isinstance(value, UUID):
+                    result[key] = str(value)
+                elif isinstance(value, datetime):
+                    result[key] = value.isoformat()
+                else:
+                    result[key] = value
+        return result

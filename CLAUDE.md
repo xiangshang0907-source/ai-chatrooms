@@ -17,6 +17,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Frontend
   - Dev: cd frontend && npm run dev
   - Build: cd frontend && npm run build
+  - Start (production): cd frontend && npm run start
   - Preview: cd frontend && npm run preview
 
 - Docker
@@ -35,10 +36,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - Persistence: Alembic migrations (backend/alembic), PostgreSQL; tests configure DATABASE_URL
   - Tests: backend/tests with pytest; CI runs subset then full PG tests via .github/workflows/backend-ci.yml
 
-- Frontend (React + Vite + TS)
-  - Entry: frontend/src/main.tsx -> App.tsx
+- Frontend (React + Next.js + TS)
+  - Entry: frontend/app/layout.tsx -> page.tsx
   - Components: Login/Register, RoomList, ChatRoom with SSE streaming
-  - Dev server proxy: frontend/vite.config.ts proxies /health, /auth, /rooms to backend:8000
+  - Dev server runs on :5173 with API proxy to backend:8000
 
 ## Notable endpoints
 
