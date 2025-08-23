@@ -75,25 +75,36 @@ class AgentService:
             db.session.add(agent_profile)
             db.session.flush()  # 获取agent_profile.id
             
-            # 创建AI代理参与者
-            ai_participant = Participant(
-                type=ParticipantType.AGENT,
-                status=ParticipantStatus.ACTIVE,
-                display_name=agent_profile.name,
-                room_id=room_id,
-                user_id=None,
-                agent_profile_id=agent_profile.id,
-            )
+            # 检查是否已存在相同agent_profile_id的参与者
+            existing_agent_participant = db.session.query(Participant).filter(
+                Participant.room_id == room_id,
+                Participant.agent_profile_id == agent_profile.id,
+                Participant.status == ParticipantStatus.ACTIVE
+            ).first()
             
-            db.session.add(ai_participant)
+            if not existing_agent_participant:
+                # 创建AI代理参与者
+                ai_participant = Participant(
+                    type=ParticipantType.AGENT,
+                    status=ParticipantStatus.ACTIVE,
+                    display_name=agent_profile.name,
+                    room_id=room_id,
+                    user_id=None,
+                    agent_profile_id=agent_profile.id,
+                )
+                
+                db.session.add(ai_participant)
+            
             db.session.commit()
             
             logger.info(f"为房间 {room_id} 创建了默认AI代理")
-            return ai_participant
+            return existing_agent_participant or ai_participant
             
         except Exception as e:
             db.session.rollback()
             logger.error(f"创建AI代理失败: {e}")
+            import traceback
+            logger.error(f"详细错误信息: {traceback.format_exc()}")
             return None
     
     @staticmethod

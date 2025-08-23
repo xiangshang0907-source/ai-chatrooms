@@ -39,6 +39,9 @@ def create_room():
         if not current_user:
             return {"error": "unauthorized", "message": "用户未登录"}, 401
         
+        import logging
+        logging.info(f"开始创建房间，用户ID: {current_user.id}")
+        
         # 创建房间
         room = Room(
             name=request_data.name,
@@ -53,18 +56,30 @@ def create_room():
         
         db.session.add(room)
         db.session.flush()  # 获取room.id
+        logging.info(f"房间创建成功，房间ID: {room.id}")
         
-        # 自动将创建者加入房间作为房主
-        participant = Participant(
-            type=ParticipantType.USER,
-            status=ParticipantStatus.ACTIVE,
-            display_name=current_user.display_name or current_user.username,
-            room_id=room.id,
-            user_id=current_user.id,
-        )
+        # 检查用户是否已经是该房间的参与者
+        existing_participant = db.session.query(Participant).filter(
+            Participant.room_id == room.id,
+            Participant.user_id == current_user.id,
+            Participant.status == ParticipantStatus.ACTIVE
+        ).first()
         
-        db.session.add(participant)
+        if not existing_participant:
+            # 自动将创建者加入房间作为房主
+            participant = Participant(
+                type=ParticipantType.HUMAN,
+                status=ParticipantStatus.ACTIVE,
+                display_name=current_user.display_name or current_user.username,
+                room_id=room.id,
+                user_id=current_user.id,
+            )
+            
+            db.session.add(participant)
+            logging.info(f"用户参与者创建成功")
+        
         db.session.commit()
+        logging.info("数据库提交成功")
         
         # 为房间创建默认AI代理
         agent_service = get_agent_service()
@@ -77,7 +92,11 @@ def create_room():
         return {"error": "validation_error", "message": str(e)}, 400
     except Exception as e:
         db.session.rollback()
-        return {"error": "creation_failed", "message": "房间创建失败，请重试"}, 500
+        import logging
+        import traceback
+        logging.error(f"房间创建失败: {e}")
+        logging.error(f"详细错误信息: {traceback.format_exc()}")
+        return {"error": "creation_failed", "message": f"房间创建失败: {str(e)}"}, 500
 
 
 @room_blueprint.route("", methods=["GET"])
