@@ -81,6 +81,7 @@ def create_room():
 
 
 @room_blueprint.route("", methods=["GET"])
+@jwt_required()
 def get_rooms():
     """获取房间列表."""
     try:

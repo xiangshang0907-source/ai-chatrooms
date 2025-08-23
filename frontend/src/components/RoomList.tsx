@@ -23,14 +23,33 @@ export function RoomList({ onJoinRoom, onLogout }: RoomListProps) {
   const loadRooms = async () => {
     try {
       setLoading(true);
-      const response = await authService.fetchWithAuth('/rooms');
+      const response = await authService.fetchWithAuth('/api/rooms');
+      
+      // 检查响应状态
       if (!response.ok) {
-        throw new Error('获取房间列表失败');
+        // 尝试解析错误响应
+        let errorMessage = '获取房间列表失败';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch {
+          // 如果无法解析JSON，使用状态文本
+          errorMessage = response.statusText || errorMessage;
+        }
+        throw new Error(errorMessage);
       }
+      
+      // 检查响应内容类型
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('服务器返回了非JSON格式的响应');
+      }
+      
       const data = await response.json();
       setRooms(data.rooms || []);
       setError('');
     } catch (err) {
+      console.error('加载房间列表错误:', err);
       setError(err instanceof Error ? err.message : '获取房间列表失败');
     } finally {
       setLoading(false);
@@ -295,7 +314,7 @@ function CreateRoomModal({ onClose, onRoomCreated }: CreateRoomModalProps) {
     setError('');
 
     try {
-      const response = await authService.fetchWithAuth('/rooms', {
+      const response = await authService.fetchWithAuth('/api/rooms', {
         method: 'POST',
         body: JSON.stringify({
           name: name.trim(),

@@ -20,7 +20,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - Start (production): cd frontend && npm run start
   - Preview: cd frontend && npm run preview
 
-- Docker
+- Docker (Default)
   - Start services: docker-compose up -d postgres redis
   - Start backend via compose: docker-compose up -d backend
 

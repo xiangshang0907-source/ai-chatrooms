@@ -7,7 +7,7 @@ class AuthService {
   private readonly USER_KEY = 'ai_chatrooms_user';
 
   async login(username: string, password: string): Promise<AuthResponse> {
-    const response = await fetch('/auth/login', {
+    const response = await fetch('/api/auth/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -26,7 +26,7 @@ class AuthService {
   }
 
   async register(username: string, email: string, password: string, displayName?: string): Promise<AuthResponse> {
-    const response = await fetch('/auth/register', {
+    const response = await fetch('/api/auth/register', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -84,7 +84,7 @@ class AuthService {
       throw new Error('没有刷新令牌');
     }
 
-    const response = await fetch('/auth/refresh', {
+    const response = await fetch('/api/auth/refresh', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${refreshToken}`,
