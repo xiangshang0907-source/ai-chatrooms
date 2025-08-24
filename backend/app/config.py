@@ -11,11 +11,15 @@ class Config:
 
     # 数据库配置 - 移除硬编码密码，强制使用环境变量
     DATABASE_URL: str = os.getenv("DATABASE_URL")
-    if not DATABASE_URL:
+    # 只在非测试环境下强制要求 DATABASE_URL
+    if not DATABASE_URL and not os.getenv("TESTING"):
         raise ValueError(
             "DATABASE_URL environment variable is required. "
             "Please set it in your .env file or environment."
         )
+    # 在测试环境下，如果没有设置 DATABASE_URL，使用内存数据库
+    elif not DATABASE_URL and os.getenv("TESTING"):
+        DATABASE_URL = "sqlite:///:memory:"
     
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 

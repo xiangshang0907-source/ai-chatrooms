@@ -2,7 +2,7 @@ services:
   postgres:
     image: postgres:16-alpine
     env_file:
-      - .env  # 添加这行，让 postgres 服务也能读取 .env 文件
+      - .env
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
