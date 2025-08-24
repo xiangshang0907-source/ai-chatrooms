@@ -1,4 +1,5 @@
 import os
+import secrets
 
 
 class Config:
@@ -8,9 +9,14 @@ class Config:
 
     PORT: int = int(os.getenv("PORT", "8000"))
 
-    DATABASE_URL: str = os.getenv(
-        "DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/ai_chatrooms"
-    )
+    # 数据库配置 - 移除硬编码密码，强制使用环境变量
+    DATABASE_URL: str = os.getenv("DATABASE_URL")
+    if not DATABASE_URL:
+        raise ValueError(
+            "DATABASE_URL environment variable is required. "
+            "Please set it in your .env file or environment."
+        )
+    
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
     # LLM 配置
@@ -34,8 +40,8 @@ class Config:
     AWS_ACCESS_KEY_ID: str | None = os.getenv("AWS_ACCESS_KEY_ID")
     AWS_SECRET_ACCESS_KEY: str | None = os.getenv("AWS_SECRET_ACCESS_KEY")
 
-    # JWT 配置
-    JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY", "jwt-secret-key-for-ai-chatrooms-2024")
+    # JWT 配置 - 使用更安全的默认值
+    JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY", secrets.token_urlsafe(32))
     JWT_ACCESS_TOKEN_EXPIRES: int = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRES", "3600"))
     JWT_REFRESH_TOKEN_EXPIRES: int = int(os.getenv("JWT_REFRESH_TOKEN_EXPIRES", "2592000"))
 

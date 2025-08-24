@@ -1,0 +1,4 @@
+.env.example
+README.md
+backend/app/config.py
+docker-compose.yml

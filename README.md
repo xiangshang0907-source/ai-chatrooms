@@ -6,7 +6,24 @@
 
 前置：Python 3.11+。
 
+### 1. 环境配置
+首先配置环境变量（安全起见，请使用强密码）：
+
 ```bash
+# 创建环境变量文件
+cp .env.example .env
+
+# 编辑 .env 文件，设置数据库密码和其他敏感信息
+# 重要：请使用强密码，不要使用默认值
+```
+
+### 2. 启动服务
+```bash
+# 使用 Docker Compose（推荐）
+docker-compose up -d postgres redis
+docker-compose up -d backend
+
+# 或直接运行后端
 cd backend
 python -m venv .venv
 source .venv/bin/activate
