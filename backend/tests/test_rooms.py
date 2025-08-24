@@ -107,7 +107,10 @@ def client(app: Flask) -> FlaskClient:
 def auth_headers(app: Flask, test_user: User) -> dict[str, str]:
     """创建认证头部."""
     with app.app_context():
-        tokens = create_tokens(test_user.id)
+        # 重新获取用户对象以确保会话绑定
+        user = db.session.merge(test_user)
+        db.session.refresh(user)
+        tokens = create_tokens(user.id)
         return {"Authorization": f"Bearer {tokens['access_token']}"}
 
 
@@ -166,9 +169,9 @@ class TestRoomBasicAPI:
         data = response.get_json()
         assert data["error"] == "validation_error"
     
-    def test_get_rooms_list(self, client: FlaskClient):
+    def test_get_rooms_list(self, client: FlaskClient, auth_headers: dict[str, str]):
         """测试获取房间列表."""
-        response = client.get("/rooms")
+        response = client.get("/rooms", headers=auth_headers)
         
         if response.status_code != 200:
             print(f"Response status: {response.status_code}")

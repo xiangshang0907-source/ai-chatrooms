@@ -75,9 +75,15 @@ def app() -> Flask:
 
 
 @pytest.fixture
-def test_user(app: Flask) -> str:
-    """创建测试用户并返回用户ID."""
+def test_user(app: Flask) -> User:
+    """创建测试用户."""
     with app.app_context():
+        # 检查用户是否已存在
+        existing_user = db.session.query(User).filter_by(username="testuser").first()
+        if existing_user:
+            return existing_user
+            
+        # 创建新用户
         test_user = User(
             username="testuser",
             email="test@example.com",
@@ -89,7 +95,7 @@ def test_user(app: Flask) -> str:
         )
         db.session.add(test_user)
         db.session.commit()
-        return str(test_user.id)
+        return test_user
 
 
 @pytest.fixture
@@ -145,12 +151,13 @@ def client(app: Flask) -> FlaskClient:
 
 
 @pytest.fixture
-def auth_headers(app: Flask, test_user: str) -> dict[str, str]:
+def auth_headers(app: Flask, test_user: User) -> dict[str, str]:
     """创建认证头部."""
     with app.app_context():
-        # 根据用户ID获取用户对象
-        user = db.session.query(User).filter(User.id == test_user).first()
-        tokens = create_tokens(user)
+        # 重新获取用户对象以确保会话绑定
+        user = db.session.merge(test_user)
+        db.session.refresh(user)
+        tokens = create_tokens(user.id)
         return {"Authorization": f"Bearer {tokens['access_token']}"}
 
 
