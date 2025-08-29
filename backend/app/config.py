@@ -9,15 +9,28 @@ class Config:
 
     PORT: int = int(os.getenv("PORT", "8000"))
 
-    # 数据库配置 - 移除硬编码密码，强制使用环境变量
+    # 数据库配置 - 支持自动构建 DATABASE_URL
     DATABASE_URL: str = os.getenv("DATABASE_URL")
-    # 只在非测试环境下强制要求 DATABASE_URL
+    
+    # 如果没有设置 DATABASE_URL，尝试从单独的参数构建
+    if not DATABASE_URL:
+        POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
+        POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "postgres")
+        POSTGRES_DB = os.getenv("POSTGRES_DB", "ai_chatrooms")
+        POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
+        POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
+        
+        # 构建 DATABASE_URL
+        DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
+    
+    # 只在非测试环境下强制要求数据库连接
     if not DATABASE_URL and not os.getenv("TESTING"):
         raise ValueError(
-            "DATABASE_URL environment variable is required. "
-            "Please set it in your .env file or environment."
+            "Database connection is required. Please set either DATABASE_URL or "
+            "individual database parameters (POSTGRES_USER, POSTGRES_PASSWORD, etc.) "
+            "in your .env file or environment."
         )
-    # 在测试环境下，如果没有设置 DATABASE_URL，使用内存数据库
+    # 在测试环境下，如果没有设置任何数据库配置，使用内存数据库
     elif not DATABASE_URL and os.getenv("TESTING"):
         DATABASE_URL = "sqlite:///:memory:"
     

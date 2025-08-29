@@ -14,6 +14,14 @@
 cp .env.example .env
 
 # 编辑 .env 文件，设置数据库密码和其他敏感信息
+# 推荐配置方式（避免重复）：
+POSTGRES_USER=your_db_user
+POSTGRES_PASSWORD=your_strong_password
+POSTGRES_DB=ai_chatrooms
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+
+# 程序会自动构建 DATABASE_URL
 # 重要：请使用强密码，不要使用默认值
 ```
 
