@@ -45,7 +45,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - GET /health
 - Auth: POST /auth/register, POST /auth/login, POST /auth/refresh, GET/PATCH /auth/me
-- Rooms and Messages: defined under /rooms/* with JWT; /rooms/<room_id>/messages and /messages/stream for SSE
+- Rooms and Messages: defined under /rooms/* with JWT; /rooms/<room_id>/messages and /rooms/<room_id>/messages/stream for SSE
 
 ## CI notes
 
@@ -62,4 +62,4 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Use make targets in backend/Makefile for lint/format/test
 - When developing streaming, prefer the SSE route: backend/app/routes/messages.py:116 and generate_ai_stream_response at backend/app/routes/messages.py:306
 - For debugging auth in tests, see backend/tests/test_auth_simple.py and backend/tests/test_auth_full.py
-- Frontend expects backend on 8000; adjust vite proxy if different
+- Frontend expects backend on 8000; frontend runs on :5173 with API proxy via next.config.js rewrites under /api/* (auth service uses /api/*, ChatRoom uses direct backend URLs)

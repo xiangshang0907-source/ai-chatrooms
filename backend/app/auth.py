@@ -2,7 +2,7 @@
 
 from datetime import datetime, timedelta
 from functools import wraps
-from typing import Any, Optional
+from typing import Any
 
 import bcrypt
 from flask import current_app
@@ -30,6 +30,9 @@ def init_jwt(app) -> None:
     app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(
         seconds=app.config["JWT_REFRESH_TOKEN_EXPIRES"]
     )
+
+    # Allow JWT tokens in query parameters for SSE endpoints
+    app.config["JWT_QUERY_STRING_NAME"] = "token"
 
     jwt.init_app(app)
 

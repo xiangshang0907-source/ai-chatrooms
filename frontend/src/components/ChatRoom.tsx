@@ -95,12 +95,12 @@ export function ChatRoom({ roomId, onBack }: ChatRoomProps) {
 
       // 创建新的EventSource连接用于流式响应
       const token = authService.getToken();
-      const eventSource = new EventSource(`/rooms/${roomId}/messages/stream?token=${encodeURIComponent(token || '')}`);
+      const eventSource = new EventSource(`/api/rooms/${roomId}/messages/stream?token=${encodeURIComponent(token || '')}`);
 
       eventSourceRef.current = eventSource;
 
       // 发送消息
-      const response = await authService.fetchWithAuth(`/rooms/${roomId}/messages/stream`, {
+      const response = await authService.fetchWithAuth(`/api/rooms/${roomId}/messages/stream`, {
         method: 'POST',
         body: JSON.stringify({
           content: messageContent,
