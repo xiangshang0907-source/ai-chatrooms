@@ -31,7 +31,7 @@ class TestBasicAuth:
         """测试健康检查端点."""
         response = client.get("/health")
         assert response.status_code == 200
-        
+
         data = response.get_json()
         assert data["status"] == "ok"
         assert data["service"] == "ai-chatrooms"
@@ -43,13 +43,13 @@ class TestBasicAuth:
             "email": "invalid-email",  # 无效邮箱
             "password": "123"  # 太短
         }
-        
+
         response = client.post(
             "/auth/register",
             data=json.dumps(data),
             content_type="application/json"
         )
-        
+
         assert response.status_code == 400
         response_data = response.get_json()
         assert response_data["error"] == "validation_error"
@@ -60,13 +60,13 @@ class TestBasicAuth:
             "username": "",  # 空用户名
             "password": ""   # 空密码
         }
-        
+
         response = client.post(
             "/auth/login",
             data=json.dumps(data),
             content_type="application/json"
         )
-        
+
         assert response.status_code == 400
         response_data = response.get_json()
         assert response_data["error"] == "validation_error"

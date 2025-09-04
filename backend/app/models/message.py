@@ -8,7 +8,6 @@ if TYPE_CHECKING:
     from .conversation import ConversationRun
     from .participant import Participant
     from .room import Room
-    from .user import User
 from uuid import UUID
 
 from sqlalchemy import ForeignKey, Integer, String, Text

@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from .user import User
 from uuid import UUID
 
-from sqlalchemy import ForeignKey, String, UniqueConstraint, Index
+from sqlalchemy import ForeignKey, Index, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import BaseEntity, BaseModel
@@ -67,7 +67,7 @@ class Participant(BaseModel):
     # 唯一约束：同一房间中，同一用户或代理只能有一个活跃参与
     # 使用部分索引来处理NULL值
     __table_args__ = (
-        Index("idx_room_user_unique", "room_id", "user_id", unique=True, 
+        Index("idx_room_user_unique", "room_id", "user_id", unique=True,
               postgresql_where="user_id IS NOT NULL"),
         Index("idx_room_agent_unique", "room_id", "agent_profile_id", unique=True,
               postgresql_where="agent_profile_id IS NOT NULL"),

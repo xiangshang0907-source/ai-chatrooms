@@ -14,14 +14,16 @@
 cp .env.example .env
 
 # 编辑 .env 文件，设置数据库密码和其他敏感信息
-# 推荐配置方式（避免重复）：
+# 推荐仅设置 POSTGRES_*，程序会自动构建 DATABASE_URL（无需手动设置）
 POSTGRES_USER=your_db_user
 POSTGRES_PASSWORD=your_strong_password
 POSTGRES_DB=ai_chatrooms
 POSTGRES_HOST=localhost
 POSTGRES_PORT=5432
 
-# 程序会自动构建 DATABASE_URL
+# 可选：如需覆盖自动构建行为，再设置 DATABASE_URL，需与上面保持一致
+# DATABASE_URL=postgresql://your_db_user:your_strong_password@localhost:5432/ai_chatrooms
+
 # 重要：请使用强密码，不要使用默认值
 ```
 
@@ -50,6 +52,46 @@ cd backend
 source .venv/bin/activate
 pytest -q
 ```
+
+### 3. 在 GitHub Actions 中运行测试（CI）
+在 CI 环境中，建议使用服务容器提供 PostgreSQL，并通过环境变量注入连接串：
+
+```yaml
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install deps
+        run: |
+          cd backend
+          pip install -r requirements.txt
+      - name: Run tests
+        env:
+          # 测试文件会基于此默认连接创建临时数据库
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+        run: |
+          cd backend
+          pytest -q
+```
+
+说明：
+- 测试代码会使用 `postgresql://postgres:postgres@localhost:5432/postgres` 连接默认库来创建临时测试库（见 `backend/tests`）。
+- 如需与自定义凭据对齐，可设置 `POSTGRES_*` 或直接设置 `DATABASE_URL`。
 
 ## 项目状态
 

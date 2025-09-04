@@ -7,8 +7,8 @@ from .constants import APP_VERSION
 from .database import init_db
 from .routes.auth import auth_blueprint
 from .routes.health import health_blueprint
-from .routes.rooms import room_blueprint
 from .routes.messages import message_blueprint
+from .routes.rooms import room_blueprint
 
 
 def create_app(config_overrides: dict | None = None) -> Flask:

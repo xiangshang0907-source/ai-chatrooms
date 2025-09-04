@@ -5,7 +5,6 @@ from enum import Enum
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from .message import Message
     from .participant import Participant
     from .room import Room
 from uuid import UUID

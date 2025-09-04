@@ -1,7 +1,6 @@
 """AI代理服务模块."""
 
 import logging
-from typing import Optional
 from uuid import UUID
 
 from ..database import db
@@ -14,9 +13,9 @@ logger = logging.getLogger(__name__)
 
 class AgentService:
     """AI代理服务类."""
-    
+
     @staticmethod
-    def create_default_agent_for_room(room_id: UUID, creator_id: UUID) -> Optional[Participant]:
+    def create_default_agent_for_room(room_id: UUID, creator_id: UUID) -> Participant | None:
         """
         为房间创建默认AI代理.
         
@@ -34,17 +33,17 @@ class AgentService:
                 Participant.type == ParticipantType.AGENT,
                 Participant.status == ParticipantStatus.ACTIVE
             ).first()
-            
+
             if existing_agent:
                 logger.info(f"房间 {room_id} 已有AI代理")
                 return existing_agent
-            
+
             # 获取房间信息
             room = db.session.query(Room).filter(Room.id == room_id).first()
             if not room:
                 logger.error(f"房间 {room_id} 不存在")
                 return None
-            
+
             # 创建默认AI代理配置
             agent_profile = AgentProfile(
                 name=f"{room.name} - AI助手",
@@ -71,17 +70,17 @@ class AgentService:
                 room_id=room_id,
                 created_by_id=creator_id,
             )
-            
+
             db.session.add(agent_profile)
             db.session.flush()  # 获取agent_profile.id
-            
+
             # 检查是否已存在相同agent_profile_id的参与者
             existing_agent_participant = db.session.query(Participant).filter(
                 Participant.room_id == room_id,
                 Participant.agent_profile_id == agent_profile.id,
                 Participant.status == ParticipantStatus.ACTIVE
             ).first()
-            
+
             if not existing_agent_participant:
                 # 创建AI代理参与者
                 ai_participant = Participant(
@@ -92,21 +91,21 @@ class AgentService:
                     user_id=None,
                     agent_profile_id=agent_profile.id,
                 )
-                
+
                 db.session.add(ai_participant)
-            
+
             db.session.commit()
-            
+
             logger.info(f"为房间 {room_id} 创建了默认AI代理")
             return existing_agent_participant or ai_participant
-            
+
         except Exception as e:
             db.session.rollback()
             logger.error(f"创建AI代理失败: {e}")
             import traceback
             logger.error(f"详细错误信息: {traceback.format_exc()}")
             return None
-    
+
     @staticmethod
     def ensure_room_has_agent(room_id: UUID, creator_id: UUID) -> bool:
         """

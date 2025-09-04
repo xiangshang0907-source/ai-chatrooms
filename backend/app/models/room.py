@@ -12,8 +12,7 @@ if TYPE_CHECKING:
     from .user import User
 from uuid import UUID
 
-from sqlalchemy import Boolean, ForeignKey, Integer, JSON, String, Text
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import JSON, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import BaseEntity, BaseModel

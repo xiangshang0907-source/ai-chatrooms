@@ -2,7 +2,6 @@
 
 import json
 import logging
-from typing import Any, Optional
 
 import requests
 from flask import current_app
@@ -19,20 +18,20 @@ class AIServiceError(Exception):
 
 class AIService:
     """AI服务集成类."""
-    
+
     def __init__(self):
         """初始化AI服务."""
         self.api_key = current_app.config.get("QWEN_API_KEY")
         self.api_base = current_app.config.get("QWEN_API_BASE", "https://dashscope.aliyuncs.com/api/v1")
         self.model_name = "qwen-plus"  # 默认模型
-        
+
         if not self.api_key:
             logger.warning("QWEN_API_KEY not configured")
-    
+
     def generate_response(
         self,
         messages: list[dict[str, str]],
-        system_prompt: Optional[str] = None,
+        system_prompt: str | None = None,
         temperature: float = 0.7,
         max_tokens: int = 2000,
         **kwargs
@@ -55,21 +54,21 @@ class AIService:
         """
         if not self.api_key:
             raise AIServiceError("AI服务未配置API密钥")
-        
+
         try:
             # 构建请求消息
             api_messages = []
-            
+
             # 添加系统提示词
             if system_prompt:
                 api_messages.append({
                     "role": "system",
                     "content": system_prompt
                 })
-            
+
             # 添加对话消息
             api_messages.extend(messages)
-            
+
             # 构建请求数据
             request_data = {
                 "model": self.model_name,
@@ -81,41 +80,41 @@ class AIService:
                     "repetition_penalty": kwargs.get("repetition_penalty", 1.1),
                 }
             }
-            
+
             # 发送请求
             headers = {
                 "Authorization": f"Bearer {self.api_key}",
                 "Content-Type": "application/json",
                 "Accept": "application/json"
             }
-            
+
             response = requests.post(
                 f"{self.api_base}/services/aigc/text-generation/generation",
                 headers=headers,
                 json=request_data,
                 timeout=30
             )
-            
+
             if response.status_code != 200:
                 logger.error(f"AI API请求失败: {response.status_code} - {response.text}")
                 raise AIServiceError(f"AI API请求失败: {response.status_code}")
-            
+
             result = response.json()
-            
+
             # 检查响应格式
             if "output" not in result:
                 logger.error(f"AI API响应格式错误: {result}")
                 raise AIServiceError("AI API响应格式错误")
-            
+
             output = result["output"]
             usage = result.get("usage", {})
-            
+
             # 提取响应内容
             content = output.get("text", "")
             if not content:
                 logger.error(f"AI API返回空内容: {result}")
                 raise AIServiceError("AI API返回空内容")
-            
+
             return AIResponseResult(
                 content=content,
                 usage_tokens=usage.get("total_tokens"),
@@ -126,7 +125,7 @@ class AIService:
                     "request_id": result.get("request_id")
                 }
             )
-            
+
         except requests.RequestException as e:
             logger.error(f"AI API网络请求错误: {e}")
             raise AIServiceError(f"AI服务网络错误: {str(e)}")
@@ -136,7 +135,7 @@ class AIService:
         except Exception as e:
             logger.error(f"AI服务未知错误: {e}")
             raise AIServiceError(f"AI服务错误: {str(e)}")
-    
+
     def build_conversation_context(
         self,
         messages: list,
@@ -153,10 +152,10 @@ class AIService:
             list[dict[str, str]]: 对话上下文
         """
         context = []
-        
+
         # 只取最近的消息作为上下文
         recent_messages = messages[-max_context_length:] if len(messages) > max_context_length else messages
-        
+
         for msg in recent_messages:
             # 根据参与者类型确定角色
             if hasattr(msg, 'participant') and msg.participant:
@@ -168,12 +167,12 @@ class AIService:
                     continue  # 跳过其他类型
             else:
                 continue
-            
+
             context.append({
                 "role": role,
                 "content": msg.content
             })
-        
+
         return context
 
 

@@ -16,13 +16,13 @@ def app():
     """创建测试应用."""
     # 使用唯一的测试数据库名
     test_db_name = f"ai_chatrooms_test_{uuid.uuid4().hex[:8]}"
-    
+
     app = create_app({
         "TESTING": True,
         "DATABASE_URL": f"postgresql://postgres:postgres@localhost:5432/{test_db_name}",
         "JWT_SECRET_KEY": "test-secret-key",
     })
-    
+
     # 创建测试数据库
     import psycopg2
     conn = psycopg2.connect('postgresql://postgres:postgres@localhost:5432/postgres')
@@ -31,16 +31,16 @@ def app():
     cur.execute(f'CREATE DATABASE "{test_db_name}"')
     cur.close()
     conn.close()
-    
+
     with app.app_context():
         # 只创建测试用户表
         SimpleUser.__table__.create(db.engine)
         yield app
-        
+
         # 清理
         db.session.close()
         db.engine.dispose()
-        
+
     # 删除测试数据库
     conn = psycopg2.connect('postgresql://postgres:postgres@localhost:5432/postgres')
     conn.autocommit = True
@@ -77,7 +77,7 @@ class TestPostgreSQLConnection:
             )
             db.session.add(user)
             db.session.commit()
-            
+
             # 验证用户已创建
             found_user = db.session.query(SimpleUser).filter_by(username="testuser").first()
             assert found_user is not None
@@ -89,7 +89,7 @@ class TestPostgreSQLConnection:
         # 测试健康检查
         response = client.get("/health")
         assert response.status_code == 200
-        
+
         data = response.get_json()
         assert data["status"] == "ok"
 
@@ -101,13 +101,13 @@ class TestPostgreSQLConnection:
             "email": "invalid-email",  # 无效邮箱
             "password": "123"  # 太短
         }
-        
+
         response = client.post(
             "/auth/register",
             data=json.dumps(invalid_data),
             content_type="application/json"
         )
-        
+
         assert response.status_code == 400
         response_data = response.get_json()
         assert response_data["error"] == "validation_error"

@@ -1,7 +1,6 @@
 """认证功能测试."""
 
 import json
-from unittest.mock import patch
 
 import pytest
 
@@ -19,7 +18,7 @@ def app():
         "DATABASE_URL": "postgresql://postgres:postgres@localhost:5432/ai_chatrooms_test",
         "JWT_SECRET_KEY": "test-secret-key",
     })
-    
+
     with app.app_context():
         # 创建测试数据库表
         db.create_all()
@@ -64,16 +63,16 @@ class TestUserRegistration:
             "password": "password123",
             "display_name": "New User"
         }
-        
+
         response = client.post(
             "/auth/register",
             data=json.dumps(data),
             content_type="application/json"
         )
-        
+
         assert response.status_code == 201
         response_data = response.get_json()
-        
+
         assert "access_token" in response_data
         assert "refresh_token" in response_data
         assert response_data["token_type"] == "bearer"
@@ -88,13 +87,13 @@ class TestUserRegistration:
             "email": "different@example.com",
             "password": "password123"
         }
-        
+
         response = client.post(
             "/auth/register",
             data=json.dumps(data),
             content_type="application/json"
         )
-        
+
         assert response.status_code == 409
         response_data = response.get_json()
         assert response_data["error"] == "username_exists"
@@ -106,13 +105,13 @@ class TestUserRegistration:
             "email": "test@example.com",  # 已存在的邮箱
             "password": "password123"
         }
-        
+
         response = client.post(
             "/auth/register",
             data=json.dumps(data),
             content_type="application/json"
         )
-        
+
         assert response.status_code == 409
         response_data = response.get_json()
         assert response_data["error"] == "email_exists"
@@ -124,13 +123,13 @@ class TestUserRegistration:
             "email": "invalid-email",  # 无效邮箱
             "password": "123"  # 太短
         }
-        
+
         response = client.post(
             "/auth/register",
             data=json.dumps(data),
             content_type="application/json"
         )
-        
+
         assert response.status_code == 400
         response_data = response.get_json()
         assert response_data["error"] == "validation_error"
@@ -145,16 +144,16 @@ class TestUserLogin:
             "username": "testuser",
             "password": "password123"
         }
-        
+
         response = client.post(
             "/auth/login",
             data=json.dumps(data),
             content_type="application/json"
         )
-        
+
         assert response.status_code == 200
         response_data = response.get_json()
-        
+
         assert "access_token" in response_data
         assert "refresh_token" in response_data
         assert response_data["token_type"] == "bearer"
@@ -167,13 +166,13 @@ class TestUserLogin:
             "username": "nonexistent",
             "password": "password123"
         }
-        
+
         response = client.post(
             "/auth/login",
             data=json.dumps(data),
             content_type="application/json"
         )
-        
+
         assert response.status_code == 401
         response_data = response.get_json()
         assert response_data["error"] == "invalid_credentials"
@@ -184,13 +183,13 @@ class TestUserLogin:
             "username": "testuser",
             "password": "wrongpassword"
         }
-        
+
         response = client.post(
             "/auth/login",
             data=json.dumps(data),
             content_type="application/json"
         )
-        
+
         assert response.status_code == 401
         response_data = response.get_json()
         assert response_data["error"] == "invalid_credentials"
@@ -206,21 +205,21 @@ class TestProtectedEndpoints:
             "username": "testuser",
             "password": "password123"
         }
-        
+
         login_response = client.post(
             "/auth/login",
             data=json.dumps(login_data),
             content_type="application/json"
         )
-        
+
         access_token = login_response.get_json()["access_token"]
-        
+
         # 使用令牌访问受保护端点
         response = client.get(
             "/auth/me",
             headers={"Authorization": f"Bearer {access_token}"}
         )
-        
+
         assert response.status_code == 200
         response_data = response.get_json()
         assert response_data["username"] == "testuser"
@@ -229,7 +228,7 @@ class TestProtectedEndpoints:
     def test_get_current_user_no_token(self, client):
         """测试无令牌访问受保护端点."""
         response = client.get("/auth/me")
-        
+
         assert response.status_code == 401
 
     def test_update_user_info_success(self, client, sample_user):
@@ -239,28 +238,28 @@ class TestProtectedEndpoints:
             "username": "testuser",
             "password": "password123"
         }
-        
+
         login_response = client.post(
             "/auth/login",
             data=json.dumps(login_data),
             content_type="application/json"
         )
-        
+
         access_token = login_response.get_json()["access_token"]
-        
+
         # 更新用户信息
         update_data = {
             "display_name": "Updated Test User",
             "avatar_url": "https://example.com/avatar.jpg"
         }
-        
+
         response = client.patch(
             "/auth/me",
             data=json.dumps(update_data),
             content_type="application/json",
             headers={"Authorization": f"Bearer {access_token}"}
         )
-        
+
         assert response.status_code == 200
         response_data = response.get_json()
         assert response_data["display_name"] == "Updated Test User"
