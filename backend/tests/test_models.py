@@ -12,6 +12,7 @@ from app.models.user import UserRole, UserStatus
 
 class MockBase(DeclarativeBase):
     """独立的测试基类."""
+
     pass
 
 

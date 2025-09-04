@@ -10,12 +10,12 @@ class Config:
     PORT: int = int(os.getenv("PORT", "8000"))
 
     # 数据库配置 - 支持自动构建 DATABASE_URL
-    DATABASE_URL: str = os.getenv("DATABASE_URL")
+    DATABASE_URL: str | None = os.getenv("DATABASE_URL")
 
     # 如果没有设置 DATABASE_URL，尝试从单独的参数构建
     if not DATABASE_URL:
         POSTGRES_USER = os.getenv("POSTGRES_USER")
-        POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
+        POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")  
         POSTGRES_DB = os.getenv("POSTGRES_DB")
         POSTGRES_HOST = os.getenv("POSTGRES_HOST")
         POSTGRES_PORT = os.getenv("POSTGRES_PORT")
@@ -24,15 +24,23 @@ class Config:
         if all([POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB, POSTGRES_HOST, POSTGRES_PORT]):
             DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
 
-    # 只在非测试环境下强制要求数据库连接
-    if not DATABASE_URL and not os.getenv("TESTING"):
+    # 检测测试环境的多种方式
+    _is_testing = (
+        os.getenv("TESTING") == "1" or 
+        os.getenv("PYTEST_CURRENT_TEST") is not None or
+        "pytest" in os.getenv("_", "").lower()
+    )
+
+    # 只在非测试环境下强制要求数据库连接  
+    if not DATABASE_URL and not _is_testing:
         raise ValueError(
             "Database connection is required. Please set either DATABASE_URL or "
             "individual database parameters (POSTGRES_USER, POSTGRES_PASSWORD, etc.) "
             "in your .env file or environment."
         )
+    
     # 在测试环境下，如果没有设置任何数据库配置，使用内存数据库
-    elif not DATABASE_URL and os.getenv("TESTING"):
+    elif not DATABASE_URL and _is_testing:
         DATABASE_URL = "sqlite:///:memory:"
 
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")

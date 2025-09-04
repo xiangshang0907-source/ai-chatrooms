@@ -4,7 +4,7 @@
 
 ## 快速开始（本地）
 
-前置：Python 3.11+。
+前置：Python 3.12+。
 
 ### 1. 环境配置
 首先配置环境变量（安全起见，请使用强密码）：
@@ -75,7 +75,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
       - name: Install deps
         run: |
           cd backend

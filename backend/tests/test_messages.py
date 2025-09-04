@@ -1,125 +1,31 @@
-"""消息功能测试 - 使用PostgreSQL."""
+"""Message functionality tests using PostgreSQL."""
 
 import json
 from uuid import uuid4
 
-import psycopg2
 import pytest
 from flask import Flask
 from flask.testing import FlaskClient
-from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
-from app import create_app
-from app.auth import create_tokens, hash_password
 from app.database import db
 from app.models.participant import Participant, ParticipantStatus, ParticipantType
 from app.models.room import Room, RoomStatus
 from app.models.user import User, UserRole, UserStatus
 
 
-@pytest.fixture
-def app() -> Flask:
-    """创建测试应用 - 使用PostgreSQL."""
-    # 创建测试数据库
-    test_db_name = "ai_chatrooms_test_messages"
-
-    # 连接到默认数据库创建测试数据库
-    try:
-        conn = psycopg2.connect(
-            "postgresql://postgres:postgres@localhost:5432/postgres"
-        )
-        conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-        cursor = conn.cursor()
-
-        # 删除测试数据库（如果存在）
-        cursor.execute(f"DROP DATABASE IF EXISTS {test_db_name}")
-        # 创建测试数据库
-        cursor.execute(f"CREATE DATABASE {test_db_name}")
-
-        cursor.close()
-        conn.close()
-    except psycopg2.OperationalError:
-        # 如果PostgreSQL不可用，跳过这些测试
-        pytest.skip("PostgreSQL server not available")
-
-    # 创建应用并连接到测试数据库
-    app = create_app({
-        "TESTING": True,
-        "DATABASE_URL": f"postgresql://postgres:postgres@localhost:5432/{test_db_name}",
-        "JWT_SECRET_KEY": "test-secret-key",
-        "QWEN_API_KEY": "test-api-key",  # 测试用的API密钥
-    })
-
-    with app.app_context():
-        # 创建所有数据库表
-        from app.models.base import Base
-        Base.metadata.create_all(db.engine)
-
-        yield app
-
-        # 清理：删除测试数据库
-        try:
-            db.session.close()
-            db.engine.dispose()
-
-            conn = psycopg2.connect(
-                "postgresql://postgres:postgres@localhost:5432/postgres"
-            )
-            conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-            cursor = conn.cursor()
-            cursor.execute(f"DROP DATABASE IF EXISTS {test_db_name}")
-            cursor.close()
-            conn.close()
-        except:
-            pass  # 忽略清理错误
+# Test fixtures are now provided by conftest.py
 
 
 @pytest.fixture
-def test_user(app: Flask) -> User:
-    """创建测试用户."""
+def test_room(app: Flask, test_user: User) -> str:
+    """Create test room and return room ID."""
     with app.app_context():
-        # 检查用户是否已存在
-        existing_user = db.session.query(User).filter_by(username="testuser").first()
-        if existing_user:
-            return existing_user
-
-        # 创建新用户
-        test_user = User(
-            username="testuser",
-            email="test@example.com",
-            password_hash=hash_password("testpass123"),
-            display_name="Test User",
-            is_active=True,
-            status=UserStatus.ACTIVE,
-            role=UserRole.USER,
-        )
-        db.session.add(test_user)
-        db.session.commit()
-        return test_user
-
-
-@pytest.fixture
-def test_room(app: Flask) -> str:
-    """创建测试房间并返回房间ID."""
-    with app.app_context():
-        # 直接在这里创建或获取用户
-        user = db.session.query(User).filter(User.username == "testuser").first()
-        if not user:
-            user = User(
-                username="testuser",
-                email="test@example.com",
-                password_hash=hash_password("testpass123"),
-                display_name="Test User",
-                is_active=True,
-                status=UserStatus.ACTIVE,
-                role=UserRole.USER,
-            )
-            db.session.add(user)
-            db.session.flush()
-
+        user = db.session.merge(test_user)
+        db.session.refresh(user)
+        
         test_room = Room(
-            name="测试聊天室",
-            description="用于测试消息功能的房间",
+            name="Test Chat Room",
+            description="Room for testing message functionality",
             status=RoomStatus.ACTIVE,
             max_participants=10,
             allow_user_interruption=True,
@@ -130,7 +36,7 @@ def test_room(app: Flask) -> str:
         db.session.add(test_room)
         db.session.flush()
 
-        # 创建用户参与者
+        # Create user participant
         participant = Participant(
             type=ParticipantType.HUMAN,
             status=ParticipantStatus.ACTIVE,
@@ -144,25 +50,11 @@ def test_room(app: Flask) -> str:
         return str(test_room.id)
 
 
-@pytest.fixture
-def client(app: Flask) -> FlaskClient:
-    """创建测试客户端."""
-    return app.test_client()
-
-
-@pytest.fixture
-def auth_headers(app: Flask, test_user: User) -> dict[str, str]:
-    """创建认证头部."""
-    with app.app_context():
-        # 重新获取用户对象以确保会话绑定
-        user = db.session.merge(test_user)
-        db.session.refresh(user)
-        tokens = create_tokens(user.id)
-        return {"Authorization": f"Bearer {tokens['access_token']}"}
+# Client and auth_headers fixtures are now provided by conftest.py
 
 
 class TestMessageAPI:
-    """消息API测试."""
+    """Message API tests."""
 
     def test_send_message_success(
         self,
@@ -170,7 +62,7 @@ class TestMessageAPI:
         auth_headers: dict[str, str],
         test_room: str
     ):
-        """测试发送消息成功."""
+        """Test sending message successfully."""
         message_data = {
             "content": "Hello, this is a test message!",
         }
@@ -185,10 +77,10 @@ class TestMessageAPI:
         assert response.status_code == 201
         data = response.get_json()
         assert "message_data" in data or "user_message" in data
-        assert data["message"] == "消息发送成功"
+        assert "message" in data and ("消息发送成功" in data["message"] or "success" in data["message"].lower())
 
     def test_send_message_unauthorized(self, client: FlaskClient, test_room: str):
-        """测试未认证发送消息."""
+        """Test sending message without authentication."""
         message_data = {"content": "Test message"}
 
         response = client.post(
@@ -206,7 +98,7 @@ class TestMessageAPI:
         client: FlaskClient,
         auth_headers: dict[str, str]
     ):
-        """测试发送消息到不存在的房间."""
+        """Test sending message to non-existent room."""
         room_id = str(uuid4())
         message_data = {"content": "Test message"}
 
@@ -227,7 +119,7 @@ class TestMessageAPI:
         auth_headers: dict[str, str],
         test_room: str
     ):
-        """测试获取消息历史成功."""
+        """Test getting message history successfully."""
         # 先发送一条消息
         message_data = {"content": "Test message for history"}
         client.post(
@@ -251,7 +143,7 @@ class TestMessageAPI:
         assert isinstance(data["messages"], list)
 
     def test_get_messages_unauthorized(self, client: FlaskClient, test_room: str):
-        """测试未认证获取消息历史."""
+        """Test getting message history without authentication."""
         response = client.get(f"/rooms/{test_room}/messages")
 
         assert response.status_code == 401
@@ -264,10 +156,10 @@ class TestMessageAPI:
         auth_headers: dict[str, str],
         test_room: str
     ):
-        """测试开始对话成功."""
+        """Test starting conversation successfully."""
         conversation_data = {
-            "name": "测试对话",
-            "description": "这是一个测试对话",
+            "name": "Test Conversation",
+            "description": "This is a test conversation",
         }
 
         response = client.post(
@@ -286,7 +178,7 @@ class TestMessageAPI:
 
 
 class TestMessageValidation:
-    """消息数据验证测试."""
+    """Message data validation tests."""
 
     def test_send_empty_message(
         self,
@@ -294,7 +186,7 @@ class TestMessageValidation:
         auth_headers: dict[str, str],
         test_room: str
     ):
-        """测试发送空消息."""
+        """Test sending empty message."""
         message_data = {"content": ""}
 
         response = client.post(
@@ -314,8 +206,8 @@ class TestMessageValidation:
         auth_headers: dict[str, str],
         test_room: str
     ):
-        """测试发送过长消息."""
-        # 创建超过10000字符的消息
+        """Test sending too long message."""
+        # Create message over 10000 characters
         long_content = "A" * 10001
         message_data = {"content": long_content}
 

@@ -1,7 +1,7 @@
 # 本地与容器化启动指南
 
 ## 一、准备环境
-- Python 3.11+
+- Python 3.12+
 - Node.js 18+（前端）
 - Docker 与 Docker Compose（可选）
 

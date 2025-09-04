@@ -17,7 +17,6 @@ lint:  ## 代码检查
 	python -m mypy .
 
 format:  ## 代码格式化
-	python -m black .
 	python -m ruff format .
 
 check: lint test  ## 完整的代码检查和测试

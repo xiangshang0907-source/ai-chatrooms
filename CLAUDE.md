@@ -11,6 +11,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - Format: cd backend && make format
   - Test (all): cd backend && source .venv/bin/activate && pytest -q
   - Test (single): cd backend && source .venv/bin/activate && pytest -q tests/test_health.py::test_health_endpoint
+  - Test (with DB, manual): cd backend && source .venv/bin/activate && DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}_test pytest -q
+    (Note: Construct DATABASE_URL from .env values - use individual POSTGRES_* fields from .env file)
   - Migrations (apply): cd backend && DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ai_chatrooms python -m alembic upgrade head
   - Migrations (create): cd backend && python -m alembic revision --autogenerate -m "msg"
 
@@ -26,7 +28,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture overview
 
-- Backend (Flask, Python 3.11)
+- Backend (Flask, Python 3.12)
   - Entry: backend/app/main.py loads app from backend/app/__init__.py
   - Config: backend/app/config.py pulls env (DB, Redis, JWT, LLM providers)
   - Extensions: CORS, SQLAlchemy (init_db), JWT (init_jwt)
