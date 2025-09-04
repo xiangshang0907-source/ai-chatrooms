@@ -56,6 +56,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Required (common defaults in backend/app/config.py):
   - DATABASE_URL, REDIS_URL, SECRET_KEY, JWT_SECRET_KEY
   - LLM providers: QWEN_API_KEY/QWEN_API_BASE, OPENAI_API_KEY/OPENAI_API_BASE, AZURE_* or AWS_*
+- IMPORTANT: Always check .env file for actual database credentials. Use the DATABASE_URL format from .env or construct it from POSTGRES_USER/POSTGRES_PASSWORD values when running alembic commands.
 
 ## Tips specific to this repo
 
