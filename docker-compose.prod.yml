@@ -1,0 +1,41 @@
+version: '3.8'
+
+# Production overrides for docker-compose.yml
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up
+
+services:
+  nginx:
+    # Add production-specific nginx settings
+    environment:
+      - NGINX_WORKER_PROCESSES=auto
+      - NGINX_WORKER_CONNECTIONS=1024
+    
+  frontend:
+    # Use build instead of image for production
+    build:
+      context: ./frontend
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: http://localhost/api
+    # Remove volume mounts for production (code is baked into image)
+    volumes: []
+    # Use production command
+    command: ["npm", "start"]
+    
+  backend:
+    environment:
+      FLASK_ENV: production
+      DEBUG: "false"
+    # Remove volume mounts for production if desired
+    # volumes: []
+    
+  # Production-specific settings for databases
+  postgres:
+    # Remove port exposure for production security
+    ports: []
+    restart: unless-stopped
+    
+  redis:
+    # Remove port exposure for production security  
+    ports: []
+    restart: unless-stopped

@@ -1,25 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  async rewrites() {
-    return [
-      {
-        source: '/api/health',
-        destination: 'http://localhost:8000/health',
-      },
-      {
-        source: '/api/auth/:path*',
-        destination: 'http://localhost:8000/auth/:path*',
-      },
-      {
-        source: '/api/rooms/:path*',
-        destination: 'http://localhost:8000/rooms/:path*',
-      },
-      {
-        source: '/api/messages/:path*',
-        destination: 'http://localhost:8000/messages/:path*',
-      },
-    ];
-  },
+  // Remove rewrites since nginx will handle API routing
+  // Keep headers for direct API calls during development
   async headers() {
     return [
       {
@@ -32,6 +14,14 @@ const nextConfig = {
       },
     ];
   },
+  
+  // Development settings
+  experimental: {
+    serverComponentsExternalPackages: [],
+  },
+  
+  // Output settings for production
+  output: process.env.NODE_ENV === 'production' ? 'standalone' : undefined,
 };
 
 module.exports = nextConfig;
