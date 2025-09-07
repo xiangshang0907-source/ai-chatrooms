@@ -14,7 +14,7 @@ def init_db(app: Flask) -> None:
     # 配置数据库 URI
     app.config["SQLALCHEMY_DATABASE_URI"] = app.config["DATABASE_URL"]
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    app.config["SQLALCHEMY_ECHO"] = app.config.get("DEBUG", False)
+    app.config["SQLALCHEMY_ECHO"] = app.config.get("SQLALCHEMY_ECHO", "false").lower() == "true"
 
     # 初始化 SQLAlchemy
     db.init_app(app)

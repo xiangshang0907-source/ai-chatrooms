@@ -11,9 +11,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt /app/requirements.txt
-RUN pip install --no-cache-dir -r /app/requirements.txt
+RUN pip install --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple -r /app/requirements.txt
+# RUN pip install --no-cache-dir -r /app/requirements.txt
 
 COPY app /app/app
+COPY gunicorn.conf.py /app/gunicorn.conf.py
 
 # Create non-root user
 RUN useradd -u 10001 -m appuser \
@@ -21,4 +23,4 @@ RUN useradd -u 10001 -m appuser \
 USER appuser
 
 EXPOSE 8000
-CMD ["python", "-m", "app.main"]
+CMD ["gunicorn", "-c", "gunicorn.conf.py", "app:create_app()"]
