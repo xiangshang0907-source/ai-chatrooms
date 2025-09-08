@@ -46,7 +46,7 @@ export function ChatRoom({ roomId, onBack }: ChatRoomProps) {
       setLoading(true);
       
       // 加载房间信息
-      const roomResponse = await authService.fetchWithAuth(`/rooms/${roomId}`);
+      const roomResponse = await authService.fetchWithAuth(`/api/rooms/${roomId}`);
       if (!roomResponse.ok) {
         throw new Error('获取房间信息失败');
       }
@@ -55,7 +55,7 @@ export function ChatRoom({ roomId, onBack }: ChatRoomProps) {
 
       // 检查是否已加入房间，如果没有则自动加入
       try {
-        await authService.fetchWithAuth(`/rooms/${roomId}/join`, {
+        await authService.fetchWithAuth(`/api/rooms/${roomId}/join`, {
           method: 'POST',
           body: JSON.stringify({}),
         });
@@ -64,7 +64,7 @@ export function ChatRoom({ roomId, onBack }: ChatRoomProps) {
       }
 
       // 加载消息历史
-      const messagesResponse = await authService.fetchWithAuth(`/rooms/${roomId}/messages`);
+      const messagesResponse = await authService.fetchWithAuth(`/api/rooms/${roomId}/messages`);
       if (messagesResponse.ok) {
         const messagesData = await messagesResponse.json();
         setMessages(messagesData.messages || []);
